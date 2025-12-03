@@ -238,7 +238,7 @@ const AddEntry = () => {
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      value={`Total: ₹${getOnlineAmountsTotal().toFixed(2)}`}
+                      value={`₹${getOnlineAmountsTotal().toFixed(2)}`}
                       readOnly
                       className={`input-field flex-1 bg-gray-50 dark:bg-gray-700 cursor-not-allowed ${
                         getOnlineAmountsTotal() < 0 ? 'text-red-600 dark:text-red-400' : ''
@@ -249,7 +249,7 @@ const AddEntry = () => {
                       onClick={() => setShowOnlineModal(true)}
                       className="btn-primary whitespace-nowrap"
                     >
-                      {onlineAmountsList.length > 0 ? 'Edit' : 'Add'} Amounts
+                      {onlineAmountsList.length > 0 ? 'Edit' : 'Add'}
                     </button>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
