@@ -17,28 +17,80 @@ const COLLECTION_NAME = 'entries';
 
 /**
  * Calculate derived fields for an entry
+ * 
+ * Calculation Logic:
+ * 1. Net earnings = Gross - CNG
+ * 2. Base 50-50 split
+ * 3. Driver pass is purchased from online payments, so:
+ *    - Net online settlement = Online amounts - Driver pass amount
+ * 4. Apply net online settlement (owner gets -netOnline, driver gets +netOnline)
+ * 5. Driver pass is 50-50 expense, both pay their share
+ * 6. Final earnings = after online settlement - pass contribution
  */
 export const calculateEntryFields = (data) => {
+  // Parse input values
   const grossEarnings = parseFloat(data.grossEarnings) || 0;
   const cng = parseFloat(data.cng) || 0;
+  const onlineAmountToDriver = parseFloat(data.onlineAmountToDriver) || 0;
+  const driverPassUsed = data.driverPassUsed === true || data.driverPassUsed === 'true';
+  const driverPassAmount = parseFloat(data.driverPassAmount) || 0;
   const kmStart = parseFloat(data.kmStart) || 0;
   const kmEnd = parseFloat(data.kmEnd) || 0;
 
+  // Step 1: Net earnings before adjustments
   const netEarnings = grossEarnings - cng;
-  const ownerEarnings = netEarnings * 0.5;
-  const driverEarnings = netEarnings * 0.5;
+
+  // Step 2: Base 50-50 split
+  const baseOwner = netEarnings * 0.5;
+  const baseDriver = netEarnings * 0.5;
+
+  // Step 3: Driver pass is purchased from online payments
+  // So net online settlement = online amounts - driver pass amount
+  const netOnlineSettlement = onlineAmountToDriver - (driverPassUsed ? driverPassAmount : 0);
+
+  // Step 4: Apply net online settlement adjustment
+  // Owner received money that belongs to driver, so subtract from owner, add to driver
+  const ownerAfterOnline = baseOwner - netOnlineSettlement;
+  const driverAfterOnline = baseDriver + netOnlineSettlement;
+
+  // Step 5: Driver Pass handling (if purchased) - 50-50 split
+  let ownerPassContribution = 0;
+  let driverPassContribution = 0;
+  
+  if (driverPassUsed && driverPassAmount > 0) {
+    // Split 50-50
+    ownerPassContribution = driverPassAmount * 0.5;
+    driverPassContribution = driverPassAmount * 0.5;
+  }
+
+  // Step 6: Final earnings
+  const finalOwnerEarnings = ownerAfterOnline - ownerPassContribution;
+  const finalDriverEarnings = driverAfterOnline - driverPassContribution;
+
+  // KM Difference
   const kmDiff = kmEnd - kmStart;
 
   return {
     ...data,
     grossEarnings,
     cng,
+    onlineAmountToDriver,
+    driverPassUsed,
+    driverPassAmount: driverPassUsed ? driverPassAmount : 0,
     netEarnings,
-    ownerEarnings,
-    driverEarnings,
+    ownerEarnings: finalOwnerEarnings,
+    driverEarnings: finalDriverEarnings,
     kmStart,
     kmEnd,
     kmDiff,
+    // Store intermediate values for display purposes
+    _baseOwner: baseOwner,
+    _baseDriver: baseDriver,
+    _netOnlineSettlement: netOnlineSettlement,
+    _ownerAfterOnline: ownerAfterOnline,
+    _driverAfterOnline: driverAfterOnline,
+    _ownerPassContribution: ownerPassContribution,
+    _driverPassContribution: driverPassContribution,
   };
 };
 
@@ -48,14 +100,18 @@ export const calculateEntryFields = (data) => {
 export const addEntry = async (entryData) => {
   const calculatedData = calculateEntryFields(entryData);
   
-  const entry = {
-    ...calculatedData,
-    date: entryData.date, // YYYY-MM-DD format
-    trips: parseInt(entryData.trips) || 0,
-    hoursWorked: entryData.hoursWorked || '',
-    notes: entryData.notes || '',
-    createdAt: Timestamp.now(),
-  };
+  // Remove intermediate calculation fields before saving
+  const { _baseOwner, _baseDriver, _ownerAfterOnline, _driverAfterOnline, _ownerPassContribution, _driverPassContribution, ...entry } = calculatedData;
+  
+  entry.date = entryData.date; // YYYY-MM-DD format
+  entry.trips = parseInt(entryData.trips) || 0;
+  entry.hoursWorked = entryData.hoursWorked || '';
+  entry.notes = entryData.notes || '';
+  // Store online amounts list if available
+  if (entryData.onlineAmountsList && Array.isArray(entryData.onlineAmountsList)) {
+    entry.onlineAmountsList = entryData.onlineAmountsList;
+  }
+  entry.createdAt = Timestamp.now();
 
   const docRef = await addDoc(collection(db, COLLECTION_NAME), entry);
   return docRef.id;
@@ -67,13 +123,17 @@ export const addEntry = async (entryData) => {
 export const updateEntry = async (entryId, entryData) => {
   const calculatedData = calculateEntryFields(entryData);
   
-  const entry = {
-    ...calculatedData,
-    date: entryData.date,
-    trips: parseInt(entryData.trips) || 0,
-    hoursWorked: entryData.hoursWorked || '',
-    notes: entryData.notes || '',
-  };
+  // Remove intermediate calculation fields before saving
+  const { _baseOwner, _baseDriver, _ownerAfterOnline, _driverAfterOnline, _ownerPassContribution, _driverPassContribution, ...entry } = calculatedData;
+  
+  entry.date = entryData.date;
+  entry.trips = parseInt(entryData.trips) || 0;
+  entry.hoursWorked = entryData.hoursWorked || '';
+  entry.notes = entryData.notes || '';
+  // Store online amounts list if available
+  if (entryData.onlineAmountsList && Array.isArray(entryData.onlineAmountsList)) {
+    entry.onlineAmountsList = entryData.onlineAmountsList;
+  }
 
   const entryRef = doc(db, COLLECTION_NAME, entryId);
   await updateDoc(entryRef, entry);

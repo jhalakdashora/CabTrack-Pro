@@ -6,9 +6,15 @@ A clean, mobile-friendly cab-owner dashboard to record daily earnings, CNG cost,
 
 - **Authentication**: Email/password login system
 - **Dashboard**: Today's summary with 7-day earnings chart
-- **Add Entry**: Form with live auto-calculations
+- **Add Entry**: Form with live auto-calculations including:
+  - Online amount settlements (credited to owner but belongs to driver)
+  - Driver pass tracking (optional 50-50 split)
 - **Entries List**: View all entries with sorting and CRUD operations
 - **Monthly Summary**: Detailed analytics with charts
+- **Advanced Earnings Split**: 
+  - Base 50-50 split
+  - Online settlement adjustments
+  - Driver pass contributions (50-50)
 - **Dark Mode**: Toggle between light and dark themes
 - **Mobile Responsive**: Works seamlessly on all devices
 
@@ -151,38 +157,96 @@ CabTrack Pro/
 
 ## 🔢 Auto-Calculations
 
-The app automatically calculates:
-- **Net Earnings** = Gross Earnings - CNG Cost
-- **Owner Earnings** = Net Earnings × 0.5 (50%)
-- **Driver Earnings** = Net Earnings × 0.5 (50%)
-- **KM Difference** = KM End - KM Start
+The app automatically calculates earnings using the following logic:
 
-These calculations happen in real-time in the Add Entry form and are stored in Firestore.
+### Step 1: Net Earnings
+```
+Net Earnings = Gross Earnings - CNG Cost
+```
+
+### Step 2: Base 50-50 Split
+```
+Base Owner = Net Earnings × 0.5
+Base Driver = Net Earnings × 0.5
+```
+
+### Step 3: Online Settlement Adjustment
+When online amounts are credited to owner but belong to driver:
+```
+Owner After Online = Base Owner - Online Amount to Driver
+Driver After Online = Base Driver + Online Amount to Driver
+```
+
+### Step 4: Driver Pass (if purchased)
+Driver pass is split 50-50 between owner and driver:
+```
+Owner Pass Contribution = Driver Pass Amount × 0.5
+Driver Pass Contribution = Driver Pass Amount × 0.5
+```
+
+### Step 5: Final Earnings
+```
+Final Owner Earnings = Owner After Online - Owner Pass Contribution
+Final Driver Earnings = Driver After Online - Driver Pass Contribution
+```
+
+### Step 6: KM Difference
+```
+KM Difference = KM End - KM Start
+```
+
+All calculations happen in real-time in the Add Entry form and are stored in Firestore.
 
 ## 🎨 Features in Detail
 
 ### Dashboard
-- Today's summary cards (Gross, CNG, Net, Owner, Driver, Trips, Hours)
+- Today's summary cards including:
+  - Gross Earnings
+  - CNG Cost
+  - Online Adjustments (to driver)
+  - Driver Pass (50-50 split)
+  - Final Owner Earnings
+  - Final Driver Earnings
+  - Trips and Hours
 - Interactive bar chart showing last 7 days' gross earnings
 - Quick "Add Entry" button
 
 ### Add Entry
-- Form with all required fields
-- Live calculation preview panel
+- Form with all required fields:
+  - Date, Gross Earnings, CNG
+  - Online Amount to Driver (optional)
+  - Driver Pass (checkbox + amount, optional)
+  - Trips, Hours Worked
+  - KM Start/End, Notes
+- Live calculation preview panel showing:
+  - Net Earnings
+  - Base 50-50 split
+  - Online settlement effects
+  - Driver pass contributions
+  - Final owner and driver earnings
 - Auto-calculates all derived fields
 - Supports editing existing entries
 
 ### Entries List
-- Table view of all entries
+- Table view of all entries with columns:
+  - Date, Gross, CNG, Online Adjust., Net, Owner, Driver, Pass, Trips, Hours
 - Sort by: Date, Highest Earnings, Highest Trips, Most Hours
 - Edit and Delete functionality
 - Responsive table design
 
 ### Monthly Summary
 - Month selector
-- Total statistics for the month
+- Total statistics for the month including:
+  - Total Gross Earnings
+  - Total CNG Paid
+  - Total Online Settlements
+  - Total Driver Pass (with 50-50 split info)
+  - Total Net Earnings
+  - Total Owner Earnings
+  - Total Driver Earnings
+  - Total Trips and Hours
+  - Average daily gross
 - Daily earnings chart for the entire month
-- Average daily gross calculation
 
 ## 🔒 Security
 

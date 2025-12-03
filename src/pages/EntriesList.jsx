@@ -129,6 +129,9 @@ const EntriesList = () => {
                   CNG
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Online Adjust.
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Net
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -136,6 +139,9 @@ const EntriesList = () => {
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Driver
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Pass
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Trips
@@ -151,7 +157,7 @@ const EntriesList = () => {
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredEntries.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan="11" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                     No entries found. <Link to="/add-entry" className="text-primary-600 dark:text-primary-400 hover:underline">Add your first entry</Link>
                   </td>
                 </tr>
@@ -170,6 +176,13 @@ const EntriesList = () => {
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                       ₹{(entry.cng || 0).toFixed(2)}
                     </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-yellow-600 dark:text-yellow-400">
+                      {entry.onlineAmountToDriver > 0 ? (
+                        <span className="font-medium">₹{(entry.onlineAmountToDriver || 0).toFixed(2)}</span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-green-600 dark:text-green-400">
                       ₹{(entry.netEarnings || 0).toFixed(2)}
                     </td>
@@ -178,6 +191,13 @@ const EntriesList = () => {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-indigo-600 dark:text-indigo-400">
                       ₹{(entry.driverEarnings || 0).toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-cyan-600 dark:text-cyan-400">
+                      {entry.driverPassAmount > 0 ? (
+                        <span className="font-medium">₹{(entry.driverPassAmount || 0).toFixed(2)}</span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                       {entry.trips || 0}

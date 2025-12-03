@@ -43,6 +43,8 @@ const Dashboard = () => {
           grossEarnings: acc.grossEarnings + (entry.grossEarnings || 0),
           cng: acc.cng + (entry.cng || 0),
           netEarnings: acc.netEarnings + (entry.netEarnings || 0),
+          onlineAmountToDriver: acc.onlineAmountToDriver + (entry.onlineAmountToDriver || 0),
+          driverPassAmount: acc.driverPassAmount + (entry.driverPassAmount || 0),
           ownerEarnings: acc.ownerEarnings + (entry.ownerEarnings || 0),
           driverEarnings: acc.driverEarnings + (entry.driverEarnings || 0),
           trips: acc.trips + (entry.trips || 0),
@@ -52,6 +54,8 @@ const Dashboard = () => {
           grossEarnings: 0,
           cng: 0,
           netEarnings: 0,
+          onlineAmountToDriver: 0,
+          driverPassAmount: 0,
           ownerEarnings: 0,
           driverEarnings: 0,
           trips: 0,
@@ -128,42 +132,58 @@ const Dashboard = () => {
       value: `₹${(todayData?.grossEarnings || 0).toFixed(2)}`,
       color: 'text-blue-600 dark:text-blue-400',
       bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+      borderColor: 'border-blue-500',
     },
     {
       label: 'CNG Cost',
       value: `₹${(todayData?.cng || 0).toFixed(2)}`,
       color: 'text-orange-600 dark:text-orange-400',
       bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+      borderColor: 'border-orange-500',
     },
     {
-      label: 'Net Earnings',
-      value: `₹${(todayData?.netEarnings || 0).toFixed(2)}`,
-      color: 'text-green-600 dark:text-green-400',
-      bgColor: 'bg-green-50 dark:bg-green-900/20',
+      label: 'Online Adjustments',
+      value: `₹${(todayData?.onlineAmountToDriver || 0).toFixed(2)}`,
+      color: 'text-yellow-600 dark:text-yellow-400',
+      bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
+      borderColor: 'border-yellow-500',
+      subtitle: 'To driver',
     },
     {
-      label: 'Owner Earnings (50%)',
+      label: 'Driver Pass',
+      value: `₹${(todayData?.driverPassAmount || 0).toFixed(2)}`,
+      color: 'text-cyan-600 dark:text-cyan-400',
+      bgColor: 'bg-cyan-50 dark:bg-cyan-900/20',
+      borderColor: 'border-cyan-500',
+      subtitle: '50-50 split',
+    },
+    {
+      label: 'Final Owner Earnings',
       value: `₹${(todayData?.ownerEarnings || 0).toFixed(2)}`,
       color: 'text-purple-600 dark:text-purple-400',
       bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+      borderColor: 'border-purple-500',
     },
     {
-      label: 'Driver Earnings (50%)',
+      label: 'Final Driver Earnings',
       value: `₹${(todayData?.driverEarnings || 0).toFixed(2)}`,
       color: 'text-indigo-600 dark:text-indigo-400',
       bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
+      borderColor: 'border-indigo-500',
     },
     {
       label: 'Trips Today',
       value: todayData?.trips || 0,
       color: 'text-teal-600 dark:text-teal-400',
       bgColor: 'bg-teal-50 dark:bg-teal-900/20',
+      borderColor: 'border-teal-500',
     },
     {
       label: 'Hours Worked',
       value: `${(todayData?.hoursWorked || 0).toFixed(1)} hrs`,
       color: 'text-pink-600 dark:text-pink-400',
       bgColor: 'bg-pink-50 dark:bg-pink-900/20',
+      borderColor: 'border-pink-500',
     },
   ];
 
@@ -188,26 +208,17 @@ const Dashboard = () => {
         {stats.map((stat, index) => (
           <div
             key={index}
-            className={`card ${stat.bgColor} border-l-4 ${
-              index === 0
-                ? 'border-blue-500'
-                : index === 1
-                ? 'border-orange-500'
-                : index === 2
-                ? 'border-green-500'
-                : index === 3
-                ? 'border-purple-500'
-                : index === 4
-                ? 'border-indigo-500'
-                : index === 5
-                ? 'border-teal-500'
-                : 'border-pink-500'
-            }`}
+            className={`card ${stat.bgColor} border-l-4 ${stat.borderColor}`}
           >
             <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
               {stat.label}
             </p>
             <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+            {stat.subtitle && (
+              <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                {stat.subtitle}
+              </p>
+            )}
           </div>
         ))}
       </div>
